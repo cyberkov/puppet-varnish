@@ -15,7 +15,7 @@
 # shmlog_dir    - location for shmlog
 # shmlog_tempfs - mounts shmlog directory as tmpfs
 #                 default value: true
-# version       - passed to puppet type 'package', attribute 'ensure'
+# package_ensure- passed to puppet type 'package', attribute 'ensure'
 # add_repo      - if set to false (defaults to true), the yum/apt repo is not added
 #
 # === Default values
@@ -66,15 +66,19 @@ class varnish (
   $vcl_dir                      = undef,
   $shmlog_dir                   = '/var/lib/varnish',
   $shmlog_tempfs                = true,
-  $version                      = present,
-  $add_repo                     = true,
+  $version                      = undef,
+  $version_default              = undef,
+  $package_ensure               = present,
+  $varnish_version              = $::varnish::params::default_version,
+  $add_repo                     = $::varnish::params::add_repo,
+  $conf_file_path               = $::varnish::params::conf_file_path,
   $manage_firewall              = false,
-  $varnish_conf_template        = 'varnish/varnish-conf.erb',
-  $additional_parameters        = {},
-) {
-
-  # read parameters
-  include varnish::params
+) inherits ::varnish::params {
+  
+  if($version or $version_default)
+  {
+    warning('Class[\'varnish\'] parameter version and version_default is deprecated in favor of purge_configs')
+  }
 
   # install Varnish
   class {'varnish::install':
@@ -99,7 +103,7 @@ class varnish (
   # varnish config file
   file { 'varnish-conf':
     ensure  => present,
-    path    => $varnish::params::conf_file_path,
+    path    => $conf_file_path,
     owner   => 'root',
     group   => 'root',
     mode    => '0644',

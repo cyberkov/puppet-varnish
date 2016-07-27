@@ -17,7 +17,7 @@ class varnish::repo (
     default     => downcase($::operatingsystem),
   }
 
-  $repo_version = $varnish::version ? {
+  $repo_version = $varnish::package_ensure ? {
     /^3\./  => '3.0',
     /^4\.0/ => '4.0',
     /^4\.1/ => '4.1',
